@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "avsc": "5.7.7",
     "axios": "^1.5.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",

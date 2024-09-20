@@ -8,35 +8,39 @@ const LocalStrategy = require("passport-local").Strategy;
 
 // const exports = (module.exports = {}); create schemea and turn into model
 
-const user = connection.define("user",{
+const user = connection.define("user", {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   username: {
-    type: String,
-    index: {
-      unique: true
-    }
+    type: Sequelize.STRING,
+    unique: true,
+    allowNull: false
   },
   email: {
-    type: String,
-    index: {
-      unique: true
-    }
+    type: Sequelize.STRING,
+    unique: true,
+    allowNull: false
   },
   password: {
-    type: String
+    type: Sequelize.STRING,
+    allowNull: false
   },
   backup: {
-    type: JSON,
-    default: null
+    type: Sequelize.STRING,
+    allowNull: true
   },
   createdOn: {
-    type: Date,
+    type: Sequelize.DATE,
     default: Date.now()
   }
 }, {
   timestamps: false, // Disable timestamps
 })
 
-user.sync({force:false}).then(() => {});
+user.sync({ force: false }).then(() => { });
 
 module.exports = user;
 
@@ -95,28 +99,83 @@ module.exports.createUser = (newUser, callback) => {
   });
 };
 
-module.exports.getUserByUsername = (username, callback = null) => {
-  const query = {
-    username
-  };
-  if (callback != null)
-    User.findOne(query, callback);
-  else
-    return User.findOne(query);  
+module.exports.getUserByUsername = async (usernameIn, callback = null) => {
+
+  console.log("getUserByUsername query: ", usernameIn);
+  if (callback != null) {
+   try{
+    const userDB = user.findOne({ where: { username: usernameIn } });
+    if (userDB != null) {
+      callback(null, userDB);
+    } else {
+      callback(new Error("User not found"), null);
+    }
+  }
+  catch (err) {
+    callback(err, null);
+  }
+}
+  else {
+    var userDB = await user.findOne({ where: { username: usernameIn } });
+    return userDB;
+  }
 };
 
-module.exports.getUserByEmail = (email, callback = null) => {
-  const query = {
-    email
-  };
-  if (callback != null)
-    User.findOne(query, callback);
-  else
-    return User.findOne(query);
+module.exports.getUserByEmail = async (emailIn, callback = null) => {
+
+  if (callback != null) {
+    try {
+      const userDB = await user.findOne(
+        {
+          attributes: [ 'id','username', 'email', 'password', 'backup', 'createdOn'],
+          where: { email: emailIn }
+        }
+      );
+      if (userDB != null)
+        {callback(null, userDB);}
+      else
+        {callback(new Error("User not found"), null);}
+    } catch (err) {
+      callback(err, null);
+    }
+  } 
+  else {
+    try {
+      var userDB = await user.findOne(
+        {
+          attributes: ['id','username', 'email', 'password', 'backup', 'createdOn'],
+          where: { email: emailIn }
+        });
+      if (userDB != null)
+         {
+         return userDB; 
+        }
+        else
+        {
+          console.log("User not found");
+          return null;
+        }
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+
+
+  }
 };
 
-module.exports.getUserById = (id, callback) => {
-  user.findById(id, callback);
+module.exports.getUserById = async (idIn, callback) => {
+  try {
+    const userDB = await user.findOne({
+      attributes: ['id','username', 'email', 'password', 'backup', 'createdOn'],
+      where: { id: idIn }
+    })
+    if(userDB != null) {callback(null, userDB);}
+    else {callback(new Error("User not found"), null);} 
+
+  } catch (err) {
+    callback(err, null);
+  }
 };
 
 module.exports.comparePassword = (candidatePassword, hash, callback) => {

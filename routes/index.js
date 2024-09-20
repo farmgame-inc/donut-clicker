@@ -7,9 +7,9 @@ const User = require("../models/user");
 
 /* GET home page. */
 router.get('/', ensureAuthenticated, (req, res) => {
-  //console.log("Browser session"); console.log(req.session);
+  console.log("Browser session"); console.log(req.session);
   res.render('index', {
-    title: 'Donut Clicker',
+    title: 'Kamaloka Clicker',
     user: req.user
   });
 });
@@ -81,7 +81,7 @@ router.get('/backup', (req, res) => {
         throw err;
 
       res.send({
-        backup: user.backup
+        backup: JSON.parse(user.backup)
       });
       console.log(req.query.id + ' : Backup loaded');
     });
@@ -103,7 +103,7 @@ router.put('/save', (req, res) => {
       if (err)
         throw err;
 
-      user.backup = req.body.backup;
+      user.backup = JSON.stringify(req.body.backup);
 
       user.save(function (err) {
         if (err)

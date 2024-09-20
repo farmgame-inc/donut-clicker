@@ -25,8 +25,6 @@ RUN apt-get update -qq && \
 COPY package-lock.json package.json ./
 RUN npm install
 RUN npm ci
-RUN npm install --save node-cron
-RUN npm install pg
 
 # Copy application code
 COPY . .
@@ -40,4 +38,4 @@ COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "node", "app.js" ]
+CMD [ "node", "bin/www.js" ]

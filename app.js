@@ -10,6 +10,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const sassMiddleware = require("node-sass-middleware");
 const flash = require("connect-flash");
+const socketio = require('socket.io');
 
 const port = 42103;
 const hostname = "idler.farmgame.xyz";
@@ -122,7 +123,7 @@ app.use(
           usermodel
             .getUserByUsername(value)
             .then(user => {
-              console.log(user);
+              console.log("isUniqueUsername", user);
               if (user !== null) {
                 return reject(user);
               }
@@ -181,13 +182,13 @@ app.use((err, req, res, next) => {
 module.exports.app = app;
 module.exports.session = session;
 
-const http = require("http");
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World');
-});
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
+
+/* 
+const http = require("http");
+const server = http.createServer(app);
+const io = socketio(server);
+server.listen(3000, () => {
+    console.log('RPS started on 3000'); 
+    //serverController.startSocket(io,server);
+}); */
