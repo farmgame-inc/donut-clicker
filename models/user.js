@@ -1,13 +1,14 @@
 /*jshint esversion: 6*/
-const mongoose = require("mongoose");
+const Sequelize = require("sequelize");
+const connection = require("../database/database");
 //bcrypt for passwords
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 
 // const exports = (module.exports = {}); create schemea and turn into model
 
-const UserSchema = mongoose.Schema({
+const user = connection.define("user",{
   username: {
     type: String,
     index: {
@@ -31,17 +32,21 @@ const UserSchema = mongoose.Schema({
     type: Date,
     default: Date.now()
   }
-});
+}, {
+  timestamps: false, // Disable timestamps
+})
 
-const User = (module.exports = mongoose.model("User", UserSchema));
+user.sync({force:false}).then(() => {});
+
+module.exports = user;
 
 module.exports.getAllUsers = callback => {
-  User.find({}, callback);
+  user.find({}, callback);
 };
 
 module.exports.resetAllUsers = (req, res) => {
 
-  User
+  user
     .find({}, function (err, users) {
       if (err)
         throw err;
@@ -63,7 +68,7 @@ module.exports.resetAllUsers = (req, res) => {
 
 module.exports.resetUserById = (req, res) => {
 
-  User
+  user
     .findById(req.params.id, function (err, user) {
       if (err)
         throw err;
@@ -111,7 +116,7 @@ module.exports.getUserByEmail = (email, callback = null) => {
 };
 
 module.exports.getUserById = (id, callback) => {
-  User.findById(id, callback);
+  user.findById(id, callback);
 };
 
 module.exports.comparePassword = (candidatePassword, hash, callback) => {

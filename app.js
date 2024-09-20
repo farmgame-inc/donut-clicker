@@ -11,6 +11,9 @@ const bodyParser = require("body-parser");
 const sassMiddleware = require("node-sass-middleware");
 const flash = require("connect-flash");
 
+const port = 42103;
+const hostname = "idler.farmgame.xyz";
+
 const expressValidator = require("express-validator");
 
 const session = Session({
@@ -24,7 +27,16 @@ const session = Session({
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const mongoose = require("mongoose");
+
+const connection = require("./database/database.js");
+connection
+    .authenticate()
+    .then(() => {
+        console.log("Connected to Database");
+    })
+    .catch((err) => {
+        console.log(err);
+    })
 
 const index = require("./routes/index");
 const users = require("./routes/users");
@@ -33,19 +45,6 @@ const app = express();
 
 const usermodel = require("./models/user");
 // db connection
-mongoose.connect(
-  process.env.DB_URL,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  },
-  // Use only in dev if you have mongodb "mongodb://localhost/appLogin",
-  err => {
-    if (err) {
-      throw err;
-    }
-  }
-);
 
 // // create collection app.put("/User", (req, res) =>   new usermodel.user({
 // username: "Bob",     email: "bob.sponge@test.com",     password: "test"
@@ -181,3 +180,14 @@ app.use((err, req, res, next) => {
 });
 module.exports.app = app;
 module.exports.session = session;
+
+const http = require("http");
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello World');
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
